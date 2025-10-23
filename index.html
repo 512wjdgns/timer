@@ -414,6 +414,7 @@ segS.addEventListener('click', (e)=>{
     totalSeconds = inputsToTotalSeconds();
     if (totalSeconds <= 0) return;
     running = true;
+  progress.style.stroke = 'url(#g)';
       if (editing) exitEditMode(true);
     prevTs = performance.now();
     // 남은 시간이 이미 세팅되어 있지 않거나 남아있지 않으면 초기화
@@ -443,7 +444,8 @@ segS.addEventListener('click', (e)=>{
       if (rafId) cancelAnimationFrame(rafId);
     rafId = null;
   }
-  function pauseTimer(){ stopTimer(); }
+  function pauseTimer(){ stopTimer();
+progress.style.stroke = 'rgba(255,255,255,0.12)'; }
 
   function resetTimer(){
     stopTimer();
@@ -482,6 +484,16 @@ segS.addEventListener('click', (e)=>{
       exitEditMode(false);
     }
   });
+
+// 마우스 우클릭을 스페이스바와 동일하게 동작하도록 처리
+document.addEventListener('contextmenu', function(e) {
+  // 우클릭 기본 메뉴 차단
+  e.preventDefault();
+
+  // 스페이스바와 동일한 토글 동작: 실행 중이면 일시정지, 아니면 시작
+  if (running) pauseTimer();
+  else startTimer();
+});
 
   // 초기 세팅
   updateDisplayFromVars();
