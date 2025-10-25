@@ -283,7 +283,7 @@
   // 휠로 값 조절
   function wheelAdjust(e, part){
     e.preventDefault();
-    const delta = Math.sign(e.deltaY) * 1;
+    const delta = Math.sign(e.deltaY) * -1;
     const mult = e.shiftKey ? 10 : 1;
     if (part === 'hours'){
       h = clamp(h + delta * mult, 0, 999);
@@ -516,4 +516,5 @@ document.addEventListener('contextmenu', function(e) {
 </script>
 </body>
 </html>
+
 
