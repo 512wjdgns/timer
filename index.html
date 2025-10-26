@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>space bar / r</title>
+<title>space bar / r / s / t</title>
 <style>
   :root{
     --size: 850px;        /* 도넛 전체 크기(원) */
@@ -431,6 +431,15 @@ segS.addEventListener('click', (e)=>{
         flashComplete();
         return;
       }
+
+// 완료시 비프음
+const originalFlashComplete = flashComplete;
+flashComplete = function(){
+  originalFlashComplete();
+  if(beepEnabled){
+    playBeep(500);  // 비프음 재생 시간
+  }
+};
       // 남은 시간 기준으로 화면과 진행바 동기화
       setProgressByRemaining();
 
@@ -460,7 +469,7 @@ progress.style.stroke = 'rgba(255,255,255,0.12)'; }
   function flashComplete(){
     const el = progress;
     let flashCount = 0;
-    const maxFlash = 6;
+    const maxFlash = 1;
     const origOpacity = el.style.opacity || '1';
     function f(){
       el.style.opacity = (el.style.opacity === '0.35' ? '1' : '0.35');
@@ -513,8 +522,71 @@ document.addEventListener('contextmenu', function(e) {
   window.addEventListener('blur', ()=>{ if (editing) exitEditMode(true); });
 
 })();
+
+// ===== 비프음 기능 & 표시 점 추가 =====
+let beepEnabled = false; // 's' 키로 on/off, 기본은 꺼짐 상태
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+// 화면 오른쪽 아래 점 표시
+const indicator = document.createElement('div');
+indicator.style.position = 'fixed';
+indicator.style.right = '25px';
+indicator.style.bottom = '20px';
+indicator.style.width = '20px';
+indicator.style.height = '20px';
+indicator.style.borderRadius = '50%';
+indicator.style.background = '#fff';
+indicator.style.opacity = '0.8';
+indicator.style.transition = 'opacity 0.2s';
+document.body.appendChild(indicator);
+function updateIndicator(){
+  indicator.style.opacity = beepEnabled ? '0.8' : '0';
+}
+updateIndicator();
+
+// 비프음 생성 함수
+function playBeep(duration=1000){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.value = 600; // 기본 주파수
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  osc.stop(audioCtx.currentTime + duration/1000);
+}
+
+// 't' 키를 누르는 동안 비프음 재생
+let tOsc = null;
+document.addEventListener('keydown', (e)=>{
+  if(e.key.toLowerCase() === 't' && !tOsc){
+    tOsc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    tOsc.type = 'square';
+    tOsc.frequency.value = 600;
+    tOsc.connect(g);
+    g.connect(audioCtx.destination);
+    g.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    tOsc.start();
+  }
+});
+document.addEventListener('keyup', (e)=>{
+  if(e.key.toLowerCase() === 't' && tOsc){
+    tOsc.stop();
+    tOsc = null;
+  }
+});
+
+// 's' 키로 완료 비프 on/off 토글
+document.addEventListener('keydown', (e)=>{
+  if(e.key.toLowerCase() === 's'){
+    beepEnabled = !beepEnabled;
+    updateIndicator();
+  }
+});
+
+
 </script>
 </body>
 </html>
-
-
